@@ -15,13 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
-
+from wagons.views import index, categories
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    # path('wagons/', index),  # Данное представление доступно по адресу http://127.0.0.1:8000/wagons/
+    # path('types/', categories),  # А это - http://127.0.0.1:8000/types/
+    path('', include('wagons.urls'))  # Представление главной страницы http://127.0.0.1:8000/
 ]
-
-

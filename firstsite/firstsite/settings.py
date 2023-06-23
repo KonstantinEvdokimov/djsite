@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ilbc_ub5)r#&*u)apz@6z!u*x#wh&m8c6$dmgk)qh2$8f(a&wu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wagons.apps.WomenConfig'
+    'wagons.apps.WagonsConfig',
 ]
 
 MIDDLEWARE = [
