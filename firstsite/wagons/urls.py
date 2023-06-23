@@ -7,3 +7,4 @@ urlpatterns = [
     path('types/<int:typeid>/', categories, name='types'),# http://127.0.0.1:8000/types/
     re_path(r'^archive/(?P<year>[0-9]{4})/', archive, name='archive'), # http://127.0.0.1:8000/archive/2020/
 ]
+
