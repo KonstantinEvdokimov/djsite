@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+
 
 class Wagons(models.Model):
     title = models.CharField(max_length=255)
@@ -10,3 +12,6 @@ class Wagons(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('post', kwargs={'post_id': self.pk})

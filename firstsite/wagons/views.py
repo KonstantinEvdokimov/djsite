@@ -3,28 +3,41 @@ from django.shortcuts import render, redirect
 
 from .models import *
 
-menu = ["О сайте", "Добавить статью", "Обратная связь", "Войти"]
-posts = Wagons.objects.all()
+menu = [{'title': "О сайте", 'url_name': 'about'},
+        {'title': "Добавить статью", 'url_name': 'add_page'},
+        {'title': "Обратная связь", 'url_name': 'contact'},
+        {'title': "Войти", 'url_name': 'login'}
+        ]
+
 
 def index(request):
-    return render(request, 'wagons/index.html', {'posts': posts,'menu': menu, 'title': 'Главная страница'})
+    posts = Wagons.objects.all()
+    context = {
+        'posts': posts,
+        'menu': menu,
+        'title': 'Главная страница'
+    }
+
+    return render(request, 'wagons/index.html', context=context)
 
 
 def about(request):
     return render(request, 'wagons/about.html', {'menu': menu, 'title': 'О сайте'})
 
 
-def categories(request, typeid):
-    return HttpResponse(f"<h1>Статьи по категориям</h1>{typeid}</p>")
+def addpage(request):
+    return HttpResponse("Добавление статьи")
 
 
-def archive(request, year):
-    if (int(year) > 2022):
-        # raise Http404()
-        # return redirect('/') # Временный редирект 302
-        return redirect('home', permanent=True)  # Постоянный редирект 301
-    return HttpResponse(f"<h1>Архив по годам</h1>{year}</p>")
+def contact(request):
+    return HttpResponse("Обратная связь")
 
 
-def pageNotFound(request, exception):
+def login(request):
+    return HttpResponse("Авторизация")
+
+def show_post(request, post_id):
+    return HttpResponse(f"Отображение статьи с id = {post_id}")
+
+def page_not_found(request, exception):
     return HttpResponseNotFound('<h1>Жаль! Страница не найдена</h1>')
