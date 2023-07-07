@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 
+from .forms import AddPostForm
 from .models import *
 
 menu = [{'title': "О сайте", 'url_name': 'about'},
@@ -37,7 +38,26 @@ def about(request):
 
 
 def addpage(request):
-    return HttpResponse("Добавление статьи")
+    '''Добавление статьи через экземпляр класса Form.
+
+    При повторном ее отображении, например, если данные были введены некорректно и нужно показать ошибки ввода,
+    то форма должна сохранять ранее введенную пользователем информацию.
+    Вначале проверяем, если пришел POST-запрос, значит, пользователем были отправлены данные.
+    В этом случае наполняем форму принятыми значениями из объекта request.POST и, затем,
+    делаем проверку на корректность заполнения полей (метод is_valid).'''
+    if request.method == 'POST':
+        form = AddPostForm(request.POST)
+        if form.is_valid():
+            # print(form.cleaned_data)
+            try:
+                Wagons.objects.create(**form.cleaned_data)
+                return redirect('home')
+            except:
+                form.add_error(None, 'Ошибка добавления поста')
+
+    else:
+        form = AddPostForm()
+    return render(request, 'wagons/addpage.html', {'menu': menu, 'title': 'Добавление статьи', 'form': form})
 
 
 def contact(request):
