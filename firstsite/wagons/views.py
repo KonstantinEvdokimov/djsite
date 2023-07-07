@@ -25,7 +25,7 @@ def show_category(request, cat_slug):
 
     context = {
         'menu': menu,
-        'title': category.title,
+        'title': category.name,
         'cat_selected': category.pk
     }
 
