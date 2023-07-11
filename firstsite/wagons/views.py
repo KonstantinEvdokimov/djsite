@@ -46,15 +46,10 @@ def addpage(request):
     В этом случае наполняем форму принятыми значениями из объекта request.POST и, затем,
     делаем проверку на корректность заполнения полей (метод is_valid).'''
     if request.method == 'POST':
-        form = AddPostForm(request.POST)
+        form = AddPostForm(request.POST, request.FILES)
         if form.is_valid():
-            # print(form.cleaned_data)
-            try:
-                Wagons.objects.create(**form.cleaned_data)
-                return redirect('home')
-            except:
-                form.add_error(None, 'Ошибка добавления поста')
-
+            form.save()
+            return redirect('home')
     else:
         form = AddPostForm()
     return render(request, 'wagons/addpage.html', {'menu': menu, 'title': 'Добавление статьи', 'form': form})
