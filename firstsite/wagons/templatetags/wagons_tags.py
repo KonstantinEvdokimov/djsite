@@ -28,7 +28,4 @@ def show_posts(cat_id=0):
     else:
         posts = Wagons.objects.filter(cat=cat_id)
 
-    if len(posts) == 0:
-        raise Http404()
-
     return {"posts" : posts}

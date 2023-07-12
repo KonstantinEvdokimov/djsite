@@ -1,7 +1,8 @@
-from django.http import HttpResponse, HttpResponseNotFound, Http404
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, CreateView
 
-from .forms import AddPostForm
+from .forms import *
 from .models import *
 
 menu = [{'title': "О сайте", 'url_name': 'about'},
@@ -11,48 +12,63 @@ menu = [{'title': "О сайте", 'url_name': 'about'},
         ]
 
 
-def index(request):
-    context = {
-        'menu': menu,
-        'title': 'Главная страница',
-        'cat_selected': 0
-    }
+class WagonsHome(ListView):
+    model = Wagons
+    template_name = 'wagons/index.html'
+    context_object_name = 'posts'
 
-    return render(request, 'wagons/index.html', context=context)
+    # extra_context = {'title': 'Главная страница'} # Подходит только для передачи статических данных (immutable data). Нельзя передать,например, список
+    def get_context_data(self, *, object_list=None, **kwargs):
+        """
+        Выполняет передачу в шаблон динамического и статического контекста.
+
+        Внутри метода мы первым делом должны повторить работу этого метода базового класса.
+        Здесь super() – это обращение к базовому классу и, далее, через точку, идет вызов аналогичного метода с передачей ему возможных именованных параметров из словаря kwargs.
+        Сформированный базовый контекст мы сохраняем через переменную context.
+        """
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Главная страница'
+        context['cat_selected'] = 0
+        context['menu'] = menu
+        return context
+
+    def get_queryset(self):
+        """
+        Возвращает только опубликованные статьи.
+        """
+        return Wagons.objects.filter(is_published=True)
 
 
-def show_category(request, cat_slug):
-    category = get_object_or_404(Category, slug=cat_slug)
+class WagonsCategory(ListView):
+    model = Wagons
+    template_name = 'wagons/index.html'
+    context_object_name = 'posts'
+    allow_empty = False
 
-    context = {
-        'menu': menu,
-        'title': category.name,
-        'cat_selected': category.pk
-    }
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Категория - ' + str(context['posts'][0].cat)
+        context['menu'] = menu
+        context['cat_selected'] = context['posts'][0].cat_id
+        return context
 
-    return render(request, 'wagons/index.html', context=context)
+    def get_queryset(self):
+        return Wagons.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
 
 
 def about(request):
     return render(request, 'wagons/about.html', {'title': 'О сайте'})
 
 
-def addpage(request):
-    '''Добавление статьи через экземпляр класса Form.
+class AddPage(CreateView):
+    form_class = AddPostForm
+    template_name = 'wagons/addpage.html'
 
-    При повторном ее отображении, например, если данные были введены некорректно и нужно показать ошибки ввода,
-    то форма должна сохранять ранее введенную пользователем информацию.
-    Вначале проверяем, если пришел POST-запрос, значит, пользователем были отправлены данные.
-    В этом случае наполняем форму принятыми значениями из объекта request.POST и, затем,
-    делаем проверку на корректность заполнения полей (метод is_valid).'''
-    if request.method == 'POST':
-        form = AddPostForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = AddPostForm()
-    return render(request, 'wagons/addpage.html', {'menu': menu, 'title': 'Добавление статьи', 'form': form})
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавление статьи'
+        context['menu'] = menu
+        return context
 
 
 def contact(request):
@@ -63,17 +79,17 @@ def login(request):
     return HttpResponse("Авторизация")
 
 
-def show_post(request, post_slug):
-    post = get_object_or_404(Wagons, slug=post_slug)
+class ShowPost(DetailView):
+    model = Wagons
+    template_name = 'wagons/post.html'
+    slug_url_kwarg = 'post_slug'
+    context_object_name = 'post'
 
-    context = {
-        'post': post,
-        'menu': menu,
-        'title': post.title,
-        'cat_selected': post.cat_id,
-    }
-
-    return render(request, 'wagons/post.html', context=context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = context['post']
+        context['menu'] = menu
+        return context
 
 
 def page_not_found(request, exception):
