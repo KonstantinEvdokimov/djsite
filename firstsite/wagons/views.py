@@ -20,11 +20,10 @@ class WagonsHome(DataMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title="Главная страница")
-        context = dict(list(context.items()) + list(c_def.items()))
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return Wagons.objects.filter(is_published=True)
+        return Wagons.objects.filter(is_published=True).select_related('cat')
 
 
 class WagonsCategory(DataMixin, ListView):
@@ -35,13 +34,14 @@ class WagonsCategory(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Категория - ' + str(context['posts'][0].cat),
-                                      cat_selected=context['posts'][0].cat_id)
+        c = Category.objects.get(slug=self.kwargs['cat_slug'])
+        c_def = self.get_user_context(title='Категория - ' + str(c.name),
+                                      cat_selected=c.pk)
 
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return Wagons.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)
+        return Wagons.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')
 
 
 def about(request):
@@ -56,8 +56,7 @@ class AddPage(LoginRequiredMixin, DataMixin, CreateView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title="Добавление статьи")
-        context = dict(list(context.items()) + list(c_def.items()))
-        return context
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 def contact(request):
@@ -96,7 +95,6 @@ class RegisterUser(DataMixin, CreateView):
         return redirect('home')
 
 
-
 class LoginUser(DataMixin, LoginView):
     form_class = LoginUserForm
     template_name = 'wagons/login.html'
@@ -108,6 +106,7 @@ class LoginUser(DataMixin, LoginView):
 
     def get_success_url(self):
         return reverse_lazy('home')
+
 
 def logout_user(request):
     logout(request)
