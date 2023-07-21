@@ -23,7 +23,8 @@ from wagons.views import page_not_found
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('wagons.urls'))  # Представление главной страницы http://127.0.0.1:8000/
+    path('', include('wagons.urls')),  # Представление главной страницы http://127.0.0.1:8000/
+    path('captcha/', include('captcha.urls')),
 ]
 
 if settings.DEBUG:
